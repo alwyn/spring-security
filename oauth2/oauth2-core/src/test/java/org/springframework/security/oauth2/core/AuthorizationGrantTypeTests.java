@@ -45,4 +45,9 @@ public class AuthorizationGrantTypeTests {
 	public void getValueWhenRefreshTokenGrantTypeThenReturnRefreshToken() {
 		assertThat(AuthorizationGrantType.REFRESH_TOKEN.getValue()).isEqualTo("refresh_token");
 	}
+
+	@Test
+	public void getValueWhenPasswordGrantTypeThenReturnPassword() {
+		assertThat(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS.getValue()).isEqualTo("password");
+	}
 }

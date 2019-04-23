@@ -48,6 +48,8 @@ public class ClientRegistrationTests {
 	private static final String CLIENT_NAME = "Client 1";
 	private static final Map<String, Object> PROVIDER_CONFIGURATION_METADATA =
 			Collections.unmodifiableMap(createProviderConfigurationMetadata());
+	public static final String USER_NAME = "User 1";
+	public static final String PASSWORD = "password";
 
 	private static Map<String, Object> createProviderConfigurationMetadata() {
 		Map<String, Object> configurationMetadata = new LinkedHashMap<>();
@@ -569,6 +571,76 @@ public class ClientRegistrationTests {
 						.tokenUri(null)
 						.build()
 		).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void buildWhenPasswordGrantAllAttributesProvidedThenAllAttributesAreSet() {
+		ClientRegistration registration = ClientRegistration.withRegistrationId(REGISTRATION_ID)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+				.authorizationGrantType(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
+				.scope(SCOPES.toArray(new String[0]))
+				.tokenUri(TOKEN_URI)
+				.userName(USER_NAME)
+				.password(PASSWORD)
+				.build();
+
+		assertThat(registration.getRegistrationId()).isEqualTo(REGISTRATION_ID);
+		assertThat(registration.getClientAuthenticationMethod()).isEqualTo(ClientAuthenticationMethod.BASIC);
+		assertThat(registration.getAuthorizationGrantType()).isEqualTo(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+		assertThat(registration.getScopes()).isEqualTo(SCOPES);
+		assertThat(registration.getProviderDetails().getTokenUri()).isEqualTo(TOKEN_URI);
+		assertThat(registration.getUserName()).isEqualTo(USER_NAME);
+		assertThat(registration.getPassword()).isEqualTo(PASSWORD);
+	}
+
+	@Test
+	public void buildWhenPasswordGrantTokenUriIsNullThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() ->
+				ClientRegistration.withRegistrationId(REGISTRATION_ID)
+						.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+						.authorizationGrantType(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
+						.tokenUri(null)
+						.userName(USER_NAME)
+						.password(PASSWORD)
+						.build()
+		).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void buildWhenPasswordGrantUserNameIsNullThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() ->
+				ClientRegistration.withRegistrationId(REGISTRATION_ID)
+						.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+						.authorizationGrantType(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
+						.tokenUri(TOKEN_URI)
+						.userName(null)
+						.password(PASSWORD)
+						.build()
+		).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void buildWhenPasswordGrantPasswordIsNullThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() ->
+				ClientRegistration.withRegistrationId(REGISTRATION_ID)
+						.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+						.authorizationGrantType(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
+						.tokenUri(TOKEN_URI)
+						.userName(USER_NAME)
+						.password(null)
+						.build()
+		).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void buildWhenPasswordGrantClientAuthenticationMethodNotProvidedThenDefaultToBasic() {
+		ClientRegistration clientRegistration = ClientRegistration.withRegistrationId(REGISTRATION_ID)
+				.authorizationGrantType(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
+				.tokenUri(TOKEN_URI)
+				.userName(USER_NAME)
+				.password(PASSWORD)
+				.build();
+		assertThat(clientRegistration.getClientAuthenticationMethod()).isEqualTo(ClientAuthenticationMethod.BASIC);
 	}
 
 	// gh-6256

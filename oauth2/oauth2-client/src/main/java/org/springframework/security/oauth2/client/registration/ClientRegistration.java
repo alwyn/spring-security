@@ -49,6 +49,8 @@ public final class ClientRegistration implements Serializable {
 	private Set<String> scopes = Collections.emptySet();
 	private ProviderDetails providerDetails = new ProviderDetails();
 	private String clientName;
+	private String userName;
+	private String password;
 
 	private ClientRegistration() {
 	}
@@ -135,6 +137,24 @@ public final class ClientRegistration implements Serializable {
 		return this.clientName;
 	}
 
+	/**
+	 * Returns the username.
+	 *
+	 * @return the username
+	 */
+	public String getUserName() {
+		return this.userName;
+	}
+
+	/**
+	 * Returns the password.
+	 *
+	 * @return the password
+	 */
+	public String getPassword() {
+		return this.password;
+	}
+
 	@Override
 	public String toString() {
 		return "ClientRegistration{"
@@ -147,6 +167,8 @@ public final class ClientRegistration implements Serializable {
 			+ ", scopes=" + this.scopes
 			+ ", providerDetails=" + this.providerDetails
 			+ ", clientName='" + this.clientName
+			+ ", userName='" + this.userName
+			+ ", password='" + this.password
 			+ '\'' + '}';
 	}
 
@@ -283,6 +305,8 @@ public final class ClientRegistration implements Serializable {
 		private String jwkSetUri;
 		private Map<String, Object> configurationMetadata = Collections.emptyMap();
 		private String clientName;
+		private String userName;
+		private String password;
 
 		private Builder(String registrationId) {
 			this.registrationId = registrationId;
@@ -476,6 +500,28 @@ public final class ClientRegistration implements Serializable {
 		}
 
 		/**
+		 * Sets the username used for the client.
+		 *
+		 * @param userName the username
+		 * @return the {@link Builder}
+		 */
+		public Builder userName(String userName) {
+			this.userName = userName;
+			return this;
+		}
+
+		/**
+		 * Sets the password used for the client.
+		 *
+		 * @param password the password
+		 * @return the {@link Builder}
+		 */
+		public Builder password(String password) {
+			this.password = password;
+			return this;
+		}
+
+		/**
 		 * Builds a new {@link ClientRegistration}.
 		 *
 		 * @return a {@link ClientRegistration}
@@ -484,6 +530,8 @@ public final class ClientRegistration implements Serializable {
 			Assert.notNull(this.authorizationGrantType, "authorizationGrantType cannot be null");
 			if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(this.authorizationGrantType)) {
 				this.validateClientCredentialsGrantType();
+			} else if (AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS.equals(this.authorizationGrantType)) {
+				this.validatePasswordGrantType();
 			} else if (AuthorizationGrantType.IMPLICIT.equals(this.authorizationGrantType)) {
 				this.validateImplicitGrantType();
 			} else {
@@ -522,6 +570,9 @@ public final class ClientRegistration implements Serializable {
 			clientRegistration.clientName = StringUtils.hasText(this.clientName) ?
 					this.clientName : this.registrationId;
 
+			clientRegistration.userName = this.userName;
+			clientRegistration.password = this.password;
+			
 			return clientRegistration;
 		}
 
@@ -552,6 +603,15 @@ public final class ClientRegistration implements Serializable {
 			Assert.hasText(this.tokenUri, "tokenUri cannot be empty");
 		}
 
+		private void validatePasswordGrantType() {
+			Assert.isTrue(AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS.equals(this.authorizationGrantType),
+					() -> "authorizationGrantType must be " + AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS.getValue());
+			Assert.hasText(this.registrationId, "registrationId cannot be empty");
+			Assert.hasText(this.userName, "userName cannot be empty");
+			Assert.hasText(this.password, "password cannot be empty");
+			Assert.hasText(this.tokenUri, "tokenUri cannot be empty");
+		}
+		
 		private void validateScopes() {
 			if (this.scopes == null) {
 				return;
